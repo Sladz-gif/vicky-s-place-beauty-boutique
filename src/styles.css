@@ -1,0 +1,133 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-deep: var(--primary-deep);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-gold: var(--gold);
+  --color-espresso: var(--espresso);
+  --color-blush: var(--blush);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --shadow-soft: 0 18px 40px -28px oklch(0.35 0.05 40 / 0.45);
+  --shadow-lift: 0 26px 60px -30px oklch(0.35 0.05 40 / 0.55);
+}
+
+:root {
+  --radius: 0.5rem;
+  /* #FBF4F0 */
+  --background: oklch(0.966 0.011 40.5);
+  /* #2B2320 */
+  --foreground: oklch(0.259 0.014 45);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.259 0.014 45);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.259 0.014 45);
+  /* #D98C96 */
+  --primary: oklch(0.712 0.087 12.5);
+  --primary-foreground: oklch(1 0 0);
+  /* #C06B77 */
+  --primary-deep: oklch(0.624 0.099 12.5);
+  /* soft blush tint */
+  --blush: oklch(0.93 0.028 20);
+  --secondary: oklch(0.94 0.017 40);
+  --secondary-foreground: oklch(0.259 0.014 45);
+  --muted: oklch(0.945 0.014 40);
+  /* #6B5D57 */
+  --muted-foreground: oklch(0.472 0.017 46);
+  --accent: oklch(0.94 0.017 40);
+  --accent-foreground: oklch(0.259 0.014 45);
+  /* #C9A15C champagne gold */
+  --gold: oklch(0.727 0.096 79);
+  /* #3A2E2A espresso */
+  --espresso: oklch(0.302 0.014 45);
+  --destructive: oklch(0.55 0.19 25);
+  --destructive-foreground: oklch(1 0 0);
+  /* #E8DAD3 */
+  --border: oklch(0.895 0.017 40);
+  --input: oklch(0.895 0.017 40);
+  --ring: oklch(0.712 0.087 12.5);
+  --sidebar: oklch(0.966 0.011 40.5);
+  --sidebar-foreground: oklch(0.259 0.014 45);
+  --sidebar-primary: oklch(0.712 0.087 12.5);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.94 0.017 40);
+  --sidebar-accent-foreground: oklch(0.259 0.014 45);
+  --sidebar-border: oklch(0.895 0.017 40);
+  --sidebar-ring: oklch(0.712 0.087 12.5);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+}
+
+@utility label-caps {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+@utility gold-rule {
+  height: 1px;
+  width: 3rem;
+  background: linear-gradient(
+    90deg,
+    var(--gold),
+    color-mix(in oklab, var(--gold) 10%, transparent)
+  );
+}

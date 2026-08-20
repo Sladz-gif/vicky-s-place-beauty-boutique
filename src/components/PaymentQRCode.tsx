@@ -1,201 +1,104 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { QrCode, Clock, XCircle, CheckCircle2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { QRCodeSVG } from "qrcode.react";
+import { RefreshCw, X, CheckCircle, XCircle, Clock, Check } from "lucide-react";
+
+type PaymentStatus = "idle" | "pending" | "success" | "failed" | "timeout";
 
 interface PaymentQRCodeProps {
-  qrValue: string | null;
+  status: PaymentStatus;
+  qrUrl: string | null;
   reference: string | null;
-  status: "idle" | "pending" | "success" | "failed" | "timeout";
-  amount: number;
-  onCancel?: () => void;
+  onCancel: () => void;
+  onRetry?: () => void;
+  onConfirmPayment?: () => void;
 }
 
 export function PaymentQRCode({
-  qrValue,
-  reference,
   status,
-  amount,
+  qrUrl,
+  reference,
   onCancel,
+  onRetry,
+  onConfirmPayment,
 }: PaymentQRCodeProps) {
-  if (status === "idle") {
-    return null;
-  }
+  const getStatusMessage = () => {
+    switch (status) {
+      case "pending":
+        return "Waiting for customer to scan and complete payment...";
+      case "success":
+        return "Payment completed successfully!";
+      case "failed":
+        return "Payment failed. Please try again.";
+      case "timeout":
+        return "Payment timed out. Please try again.";
+      default:
+        return "";
+    }
+  };
+
+  const getStatusIcon = () => {
+    switch (status) {
+      case "success":
+        return <CheckCircle className="h-12 w-12 text-green-600" />;
+      case "failed":
+        return <XCircle className="h-12 w-12 text-red-600" />;
+      case "timeout":
+        return <Clock className="h-12 w-12 text-orange-600" />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      {status === "pending" && (
-        <>
-          <Alert>
-            <QrCode className="h-4 w-4" />
-            <AlertDescription>
-              Scan the QR code with your phone to complete payment
-            </AlertDescription>
-          </Alert>
+    <div className="flex flex-col items-center gap-4">
+      <div className="flex items-center justify-between w-full">
+        <h3 className="font-semibold text-lg">Card Payment</h3>
+        <button
+          onClick={onCancel}
+          className="p-2 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
 
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <Card className="p-4 bg-white">
-              <CardContent className="p-0">
-                {qrValue ? (
-                  <div className="w-48 h-48 flex items-center justify-center">
-                    <QRCodeSVG
-                      value={qrValue}
-                      size={192}
-                      level="M"
-                      includeMargin={false}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-48 h-48 bg-gray-100 flex items-center justify-center">
-                    <div className="animate-pulse text-gray-400">
-                      Loading QR...
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="text-center space-y-2">
-              <p className="text-sm font-medium">Amount to Pay</p>
-              <p className="text-2xl font-bold">₵{amount.toFixed(2)}</p>
-            </div>
-
-            {reference && (
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Reference</p>
-                <p className="text-sm font-mono">{reference}</p>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4 animate-pulse" />
-              <span>Waiting for payment...</span>
-            </div>
-
-            <Badge variant="outline" className="animate-pulse">
-              Payment Pending
-            </Badge>
+      {status === "pending" && qrUrl && (
+        <div className="flex flex-col items-center gap-4">
+          <div className="bg-white p-4 rounded-lg border border-border">
+            <img src={qrUrl} alt="Payment QR Code" className="w-64 h-64 max-w-full h-auto" />
           </div>
-
-          {onCancel && (
-            <button
-              onClick={onCancel}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-md hover:bg-muted transition-colors"
-            >
-              <XCircle className="h-4 w-4" />
-              Cancel Payment
-            </button>
-          )}
-        </>
+          <p className="text-sm text-center text-muted-foreground">
+            Scan this QR code with your phone to complete payment
+          </p>
+          {reference && <p className="text-xs text-muted-foreground">Reference: {reference}</p>}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span>Waiting for payment...</span>
+          </div>
+          <button
+            onClick={onConfirmPayment}
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700"
+          >
+            <Check className="h-4 w-4" />
+            Confirm Payment Received
+          </button>
+          <p className="text-xs text-muted-foreground text-center">
+            Click this button after customer confirms payment on their phone
+          </p>
+        </div>
       )}
 
-      {status === "success" && (
-        <>
-          <Alert className="bg-green-50 border-green-200">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              Payment successful! Processing your order...
-            </AlertDescription>
-          </Alert>
-
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
-            </div>
-
-            <div className="text-center space-y-2">
-              <p className="text-sm font-medium">Payment Completed</p>
-              <p className="text-2xl font-bold text-green-600">
-                ₵{amount.toFixed(2)}
-              </p>
-            </div>
-
-            {reference && (
-              <div className="text-center">
-                <p className="text-xs text-muted-foreground">Reference</p>
-                <p className="text-sm font-mono">{reference}</p>
-              </div>
-            )}
-
-            <Badge
-              variant="default"
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Payment Successful
-            </Badge>
-          </div>
-        </>
-      )}
-
-      {status === "timeout" && (
-        <>
-          <Alert variant="destructive">
-            <XCircle className="h-4 w-4" />
-            <AlertDescription>
-              Payment timed out. Please try another payment method.
-            </AlertDescription>
-          </Alert>
-
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-              <XCircle className="h-8 w-8 text-red-600" />
-            </div>
-
-            <div className="text-center space-y-2">
-              <p className="text-sm font-medium">Payment Timeout</p>
-              <p className="text-sm text-muted-foreground">
-                The payment was not completed within the allowed time.
-              </p>
-            </div>
-
-            <Badge variant="destructive">Payment Timed Out</Badge>
-          </div>
-
-          {onCancel && (
+      {(status === "success" || status === "failed" || status === "timeout") && (
+        <div className="flex flex-col items-center gap-4 py-8">
+          {getStatusIcon()}
+          <p className="text-lg font-semibold">{getStatusMessage()}</p>
+          {(status === "failed" || status === "timeout") && onRetry && (
             <button
-              onClick={onCancel}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-md hover:bg-muted transition-colors"
+              onClick={onRetry}
+              className="flex items-center gap-2 px-4 py-2 rounded-md border border-border hover:bg-muted"
             >
-              Try Another Payment Method
-            </button>
-          )}
-        </>
-      )}
-
-      {status === "failed" && (
-        <>
-          <Alert variant="destructive">
-            <XCircle className="h-4 w-4" />
-            <AlertDescription>
-              Payment failed. Please try again.
-            </AlertDescription>
-          </Alert>
-
-          <div className="flex flex-col items-center space-y-4 py-4">
-            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-              <XCircle className="h-8 w-8 text-red-600" />
-            </div>
-
-            <div className="text-center space-y-2">
-              <p className="text-sm font-medium">Payment Failed</p>
-              <p className="text-sm text-muted-foreground">
-                There was an error processing your payment.
-              </p>
-            </div>
-
-            <Badge variant="destructive">Payment Failed</Badge>
-          </div>
-
-          {onCancel && (
-            <button
-              onClick={onCancel}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-md hover:bg-muted transition-colors"
-            >
+              <RefreshCw className="h-4 w-4" />
               Try Again
             </button>
           )}
-        </>
+        </div>
       )}
     </div>
   );
