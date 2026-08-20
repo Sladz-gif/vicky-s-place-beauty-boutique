@@ -16,6 +16,7 @@ import {
   QrCode,
   Clock,
   XCircle,
+  Smartphone,
 } from "lucide-react";
 import { getProducts, getCustomers, formatPrice } from "@/data/api";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { usePaystackQRPayment } from "@/hooks/usePaystackQRPayment";
 import { PaymentQRCode } from "@/components/PaymentQRCode";
+import { QRCodeSVG } from "qrcode.react";
 
 function AdminPos() {
   const [products, setProducts] = useState<any[]>([]);
@@ -56,6 +58,13 @@ function AdminPos() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cash");
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [showReceiptDialog, setShowReceiptDialog] = useState(false);
+  const [completedSale, setCompletedSale] = useState<any>(null);
+  const [receiptNotes, setReceiptNotes] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [receiptCustomerEmail, setReceiptCustomerEmail] = useState("");
 
   useEffect(() => {
     loadData();
@@ -85,6 +94,7 @@ function AdminPos() {
     const existingItem = cart.find(
       (item) => item.productId === product.id && item.variantId === variant.id,
     );
+    const price = variant.priceOverride || product.basePrice;
 
     if (existingItem) {
       if (existingItem.qty < variant.stockQty) {
@@ -104,7 +114,7 @@ function AdminPos() {
           variantId: variant.id,
           productName: product.name,
           variantLabel: variant.label,
-          price: variant.price,
+          price: price,
           qty: 1,
           maxQty: variant.stockQty,
         },
@@ -179,11 +189,34 @@ function AdminPos() {
 
   const completeSale = () => {
     // In a real app, this would create an order
+    const saleData = {
+      id: `SALE-${Date.now()}`,
+      date: new Date().toISOString(),
+      items: [...cart],
+      subtotal: cartSubtotal,
+      deliveryFee: deliveryFee,
+      total: cartTotal,
+      paymentMethod: selectedPaymentMethod,
+      mobileNumber: mobileNumber,
+      customer: selectedCustomer,
+      notes: receiptNotes,
+      customerPhone: customerPhone,
+      customerEmail: receiptCustomerEmail,
+    };
+
+    setCompletedSale(saleData);
+    // Initialize the editable fields with the sale data
+    setReceiptNotes(saleData.notes || "");
+    setCustomerPhone(saleData.customerPhone || "");
+    setReceiptCustomerEmail(saleData.customerEmail || "");
+
     setCart([]);
     setSelectedCustomer("");
     setShowCheckoutDialog(false);
+    setShowQRCode(false);
     setSelectedPaymentMethod("cash");
-    cancelCardPayment();
+    setMobileNumber("");
+    setShowReceiptDialog(true);
   };
 
   const handleCardPayment = () => {
@@ -191,10 +224,226 @@ function AdminPos() {
     initiateCardPayment();
   };
 
-  const printReceipt = () => {
-    // In a real app, this would trigger receipt printing
-    console.log("Printing receipt...");
-    completeSale();
+  const updateReceiptAndPrint = () => {
+    if (!completedSale) return;
+
+    // Create updated sale data with edited values
+    const updatedSale = {
+      ...completedSale,
+      notes: receiptNotes,
+      customerPhone: customerPhone,
+      customerEmail: receiptCustomerEmail,
+    };
+
+    // Update state and print immediately with the updated data
+    setCompletedSale(updatedSale);
+    printReceipt(updatedSale);
+  };
+
+  const printReceipt = (saleData = completedSale) => {
+    if (!saleData) return;
+
+    const formatPriceForPrint = (amount: number) =>
+      `₵${amount.toLocaleString("en-GH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    const receiptHTML = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Receipt - ${saleData.id}</title>
+        <style>
+          body {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-width: 80mm;
+            margin: 0 auto;
+            padding: 10px;
+            color: black;
+            background: white;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+          }
+          .header h1 {
+            font-size: 16px;
+            margin: 0 0 5px 0;
+            font-weight: bold;
+          }
+          .header p {
+            margin: 2px 0;
+            font-size: 10px;
+          }
+          .section {
+            margin-bottom: 10px;
+          }
+          .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 2px 0;
+          }
+          .label {
+            color: #666;
+          }
+          .items {
+            border-top: 1px dashed #000;
+            border-bottom: 1px dashed #000;
+            padding: 10px 0;
+            margin: 10px 0;
+          }
+          .item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+          }
+          .item-details {
+            flex: 1;
+          }
+          .item-name {
+            font-weight: bold;
+          }
+          .item-variant {
+            font-size: 10px;
+            color: #666;
+          }
+          .total-section {
+            border-top: 1px dashed #000;
+            padding-top: 10px;
+            margin-top: 10px;
+          }
+          .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+          }
+          .grand-total {
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 10px;
+          }
+          .footer {
+            text-align: center;
+            border-top: 1px dashed #000;
+            padding-top: 10px;
+            margin-top: 10px;
+            font-size: 10px;
+          }
+          .notes {
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin: 10px 0;
+            min-height: 30px;
+            font-size: 10px;
+          }
+          @media print {
+            body {
+              margin: 0;
+              padding: 5mm;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>VICKY'S PLACE</h1>
+          <p>Beauty Boutique</p>
+          <p>Accra, Ghana</p>
+          <p>Tel: +233 XX XXX XXXX</p>
+        </div>
+
+        <div class="section">
+          <div class="row">
+            <span class="label">Receipt #:</span>
+            <span>${saleData.id}</span>
+          </div>
+          <div class="row">
+            <span class="label">Date:</span>
+            <span>${new Date(saleData.date).toLocaleString()}</span>
+          </div>
+          <div class="row">
+            <span class="label">Payment:</span>
+            <span>${saleData.paymentMethod.replace("_", " ").toUpperCase()}</span>
+          </div>
+          ${saleData.mobileNumber ? `
+          <div class="row">
+            <span class="label">Mobile:</span>
+            <span>${saleData.mobileNumber}</span>
+          </div>
+          ` : ""}
+        </div>
+
+        ${saleData.customerPhone || saleData.customerEmail ? `
+        <div class="section">
+          <div class="row">
+            <span class="label">Customer Phone:</span>
+            <span>${saleData.customerPhone || "N/A"}</span>
+          </div>
+          <div class="row">
+            <span class="label">Customer Email:</span>
+            <span>${saleData.customerEmail || "N/A"}</span>
+          </div>
+        </div>
+        ` : ""}
+
+        <div class="items">
+          <p style="font-weight: bold; margin-bottom: 10px;">ITEMS</p>
+          ${saleData.items
+            .map(
+              (item: any) => `
+            <div class="item">
+              <div class="item-details">
+                <div class="item-name">${item.productName}</div>
+                <div class="item-variant">${item.variantLabel} x ${item.qty}</div>
+              </div>
+              <div>${formatPriceForPrint(item.price * item.qty)}</div>
+            </div>
+          `,
+            )
+            .join("")}
+        </div>
+
+        ${saleData.notes ? `
+        <div class="section">
+          <p class="label">Notes:</p>
+          <div class="notes">${saleData.notes}</div>
+        </div>
+        ` : ""}
+
+        <div class="total-section">
+          <div class="total-row">
+            <span class="label">Subtotal:</span>
+            <span>${formatPriceForPrint(saleData.subtotal)}</span>
+          </div>
+          <div class="total-row">
+            <span class="label">Delivery Fee:</span>
+            <span>${formatPriceForPrint(saleData.deliveryFee)}</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>TOTAL:</span>
+            <span>${formatPriceForPrint(saleData.total)}</span>
+          </div>
+        </div>
+
+        <div class="footer">
+          <p>Thank you for shopping with us!</p>
+          <p>Visit us again</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(receiptHTML);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
   };
 
   return (
@@ -255,21 +504,24 @@ function AdminPos() {
                           {product.sku}
                         </p>
                         <div className="space-y-2">
-                          {product.variants.slice(0, 2).map((variant: any) => (
-                            <Button
-                              key={variant.id}
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-between text-xs"
-                              onClick={() => addToCart(product, variant)}
-                              disabled={variant.stockQty === 0}
-                            >
-                              <span className="truncate">{variant.label}</span>
-                              <span className="font-medium">
-                                {formatPrice(variant.price)}
-                              </span>
-                            </Button>
-                          ))}
+                          {product.variants.slice(0, 2).map((variant: any) => {
+                            const price = variant.priceOverride || product.basePrice;
+                            return (
+                              <Button
+                                key={variant.id}
+                                variant="outline"
+                                size="sm"
+                                className="w-full justify-between text-xs"
+                                onClick={() => addToCart(product, variant)}
+                                disabled={variant.stockQty === 0}
+                              >
+                                <span className="truncate">{variant.label}</span>
+                                <span className="font-medium">
+                                  {formatPrice(price)}
+                                </span>
+                              </Button>
+                            );
+                          })}
                           {product.variants.length > 2 && (
                             <p className="text-xs text-muted-foreground text-center">
                               +{product.variants.length - 2} more variants
@@ -435,7 +687,7 @@ function AdminPos() {
 
       {/* Checkout Dialog */}
       <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Complete Sale</DialogTitle>
             <DialogDescription>
@@ -454,7 +706,10 @@ function AdminPos() {
                       variant={
                         selectedPaymentMethod === "cash" ? "default" : "outline"
                       }
-                      onClick={() => setSelectedPaymentMethod("cash")}
+                      onClick={() => {
+                        setSelectedPaymentMethod("cash");
+                        setShowQRCode(false);
+                      }}
                       className="justify-start"
                     >
                       <DollarSign className="h-4 w-4 mr-2" />
@@ -464,7 +719,10 @@ function AdminPos() {
                       variant={
                         selectedPaymentMethod === "card" ? "default" : "outline"
                       }
-                      onClick={handleCardPayment}
+                      onClick={() => {
+                        setSelectedPaymentMethod("card");
+                        setShowQRCode(true);
+                      }}
                       className="justify-start"
                     >
                       <CreditCard className="h-4 w-4 mr-2" />
@@ -476,7 +734,10 @@ function AdminPos() {
                           ? "default"
                           : "outline"
                       }
-                      onClick={() => setSelectedPaymentMethod("mtn_momo")}
+                      onClick={() => {
+                        setSelectedPaymentMethod("mtn_momo");
+                        setShowQRCode(false);
+                      }}
                       className="justify-start"
                     >
                       <Wallet className="h-4 w-4 mr-2" />
@@ -488,14 +749,90 @@ function AdminPos() {
                           ? "default"
                           : "outline"
                       }
-                      onClick={() => setSelectedPaymentMethod("vodafone_cash")}
+                      onClick={() => {
+                        setSelectedPaymentMethod("vodafone_cash");
+                        setShowQRCode(false);
+                      }}
                       className="justify-start"
                     >
                       <Wallet className="h-4 w-4 mr-2" />
                       Vodafone Cash
                     </Button>
+                    <Button
+                      variant={
+                        selectedPaymentMethod === "tigo_cash" ? "default" : "outline"
+                      }
+                      onClick={() => {
+                        setSelectedPaymentMethod("tigo_cash");
+                        setShowQRCode(false);
+                      }}
+                      className="justify-start"
+                    >
+                      <Smartphone className="h-4 w-4 mr-2" />
+                      Tigo Cash
+                    </Button>
+                    <Button
+                      variant={
+                        selectedPaymentMethod === "airteltigo" ? "default" : "outline"
+                      }
+                      onClick={() => {
+                        setSelectedPaymentMethod("airteltigo");
+                        setShowQRCode(false);
+                      }}
+                      className="justify-start"
+                    >
+                      <Smartphone className="h-4 w-4 mr-2" />
+                      AirtelTigo
+                    </Button>
                   </div>
                 </div>
+
+                {/* Mobile Money Input */}
+                {(selectedPaymentMethod === "mtn_momo" ||
+                  selectedPaymentMethod === "vodafone_cash" ||
+                  selectedPaymentMethod === "tigo_cash" ||
+                  selectedPaymentMethod === "airteltigo") && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      Mobile Money Number
+                    </p>
+                    <Input
+                      placeholder="024 XXX XXXX"
+                      value={mobileNumber}
+                      onChange={(e) => setMobileNumber(e.target.value)}
+                      className="w-full"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {selectedPaymentMethod === "mtn_momo" &&
+                        "Enter MTN MoMo number"}
+                      {selectedPaymentMethod === "vodafone_cash" &&
+                        "Enter Vodafone Cash number"}
+                      {selectedPaymentMethod === "tigo_cash" &&
+                        "Enter Tigo Cash number"}
+                      {selectedPaymentMethod === "airteltigo" &&
+                        "Enter AirtelTigo number"}
+                    </p>
+                  </div>
+                )}
+
+                {/* QR Code for Card Payment */}
+                {showQRCode && selectedPaymentMethod === "card" && (
+                  <div className="flex flex-col items-center space-y-3 p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      Scan QR Code to Pay
+                    </p>
+                    <div className="bg-white p-3 rounded-lg">
+                      <QRCodeSVG
+                        value={`VICKYSPLACE-PAY-${cartTotal.toFixed(2)}-${Date.now()}`}
+                        size={150}
+                        level="H"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Scan with any Ghana QR payment app
+                    </p>
+                  </div>
+                )}
 
                 <Separator />
 
@@ -537,6 +874,178 @@ function AdminPos() {
               onCancel={cancelCardPayment}
             />
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipt Dialog */}
+      <Dialog open={showReceiptDialog} onOpenChange={setShowReceiptDialog}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Receipt</DialogTitle>
+            <DialogDescription>
+              Review and edit receipt details before printing
+            </DialogDescription>
+          </DialogHeader>
+
+          {completedSale && (
+            <div className="space-y-4 mt-4" id="receipt-content">
+              {/* Receipt Header */}
+              <div className="text-center border-b pb-4">
+                <h2 className="text-xl font-serif font-bold text-gold">
+                  Vicky's Place
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Beauty Boutique
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Accra, Ghana
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Tel: +233 XX XXX XXXX
+                </p>
+              </div>
+
+              {/* Sale Details */}
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Receipt #:</span>
+                  <span className="font-medium">{completedSale.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Date:</span>
+                  <span>{new Date(completedSale.date).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Payment:</span>
+                  <span className="capitalize">
+                    {completedSale.paymentMethod.replace("_", " ")}
+                  </span>
+                </div>
+                {completedSale.mobileNumber && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Mobile:</span>
+                    <span>{completedSale.mobileNumber}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Customer Details (Editable) */}
+              <div className="space-y-2 border-t pt-4">
+                <p className="text-sm font-medium">Customer Details</p>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-xs text-muted-foreground">
+                      Phone Number
+                    </label>
+                    <Input
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="Customer phone (optional)"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Email</label>
+                    <Input
+                      value={receiptCustomerEmail}
+                      onChange={(e) => setReceiptCustomerEmail(e.target.value)}
+                      placeholder="Customer email (optional)"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Items */}
+              <div className="border-t pt-4">
+                <p className="text-sm font-medium mb-2">Items</p>
+                <div className="space-y-2">
+                  {completedSale.items.map((item: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex justify-between text-sm"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium">{item.productName}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.variantLabel} x {item.qty}
+                        </p>
+                      </div>
+                      <span className="font-medium">
+                        {formatPrice(item.price * item.qty)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Notes (Editable) */}
+              <div className="border-t pt-4">
+                <label className="text-sm font-medium">Notes</label>
+                <textarea
+                  value={receiptNotes}
+                  onChange={(e) => setReceiptNotes(e.target.value)}
+                  placeholder="Add notes to receipt..."
+                  className="w-full mt-1 p-2 border rounded-md text-sm resize-none"
+                  rows={2}
+                />
+              </div>
+
+              {/* Totals */}
+              <div className="border-t pt-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>{formatPrice(completedSale.subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Delivery Fee</span>
+                  <span>{formatPrice(completedSale.deliveryFee)}</span>
+                </div>
+                <Separator />
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Total</span>
+                  <span>{formatPrice(completedSale.total)}</span>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center border-t pt-4">
+                <p className="text-xs text-muted-foreground">
+                  Thank you for shopping with us!
+                </p>
+                <p className="text-xs text-muted-foreground">Visit us again</p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowReceiptDialog(false);
+                    setCompletedSale(null);
+                    setReceiptNotes("");
+                    setCustomerPhone("");
+                    setReceiptCustomerEmail("");
+                  }}
+                >
+                  Close
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={updateReceiptAndPrint}
+                >
+                  <Printer className="h-4 w-4 mr-2" />
+                  Update & Print
+                </Button>
+                <Button className="flex-1" onClick={printReceipt}>
+                  <Printer className="h-4 w-4 mr-2" />
+                  Print
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
