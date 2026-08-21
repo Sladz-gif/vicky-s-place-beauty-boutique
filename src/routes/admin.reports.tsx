@@ -48,11 +48,10 @@ function AdminReports() {
       { productId: "PROD-005", productName: "Argan Oil Serum", qty: 25, revenue: 5000 },
     ],
     salesByPaymentMethod: [
-      { method: "MTN MoMo", amount: 18240, percentage: 40 },
-      { method: "Vodafone Cash", amount: 9120, percentage: 20 },
-      { method: "Card", amount: 6840, percentage: 15 },
-      { method: "Cash", amount: 9120, percentage: 20 },
-      { method: "POS", amount: 2280, percentage: 5 },
+      { method: "MTN MoMo", amount: 18240, percentage: 42 },
+      { method: "Vodafone Cash", amount: 9120, percentage: 21 },
+      { method: "Card", amount: 6840, percentage: 16 },
+      { method: "Cash", amount: 9120, percentage: 21 },
     ],
     salesByCategory: [
       { category: "Hair Care", amount: 15600, percentage: 34.2 },

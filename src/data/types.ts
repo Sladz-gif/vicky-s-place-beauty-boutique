@@ -11,7 +11,7 @@ export type Product = {
   howToUse: string;
   basePrice: number; // GHS
   sku: string;
-  barcode?: string; // For POS scanning
+  barcode?: string; // For product scanning
   status: "active" | "draft" | "archived";
   images: string[];
   variants: Variant[];
@@ -84,7 +84,7 @@ export type Order = {
   discount: number;
   deliveryFee: number;
   total: number;
-  paymentMethod: "card" | "mtn_momo" | "vodafone_cash" | "airteltigo_money" | "cash" | "pos";
+  paymentMethod: "card" | "mtn_momo" | "vodafone_cash" | "airteltigo_money" | "cash";
   discountCode?: string;
   placedAt: string;
   updatedAt: string;
@@ -137,7 +137,7 @@ export type Staff = {
   phone?: string;
   loginCode: string;
   role: "admin" | "manager" | "staff";
-  moduleAccess: ("inventory" | "finance" | "orders" | "ops" | "pos" | "reports")[];
+  moduleAccess: ("inventory" | "finance" | "orders" | "ops" | "reports")[];
   active: boolean;
   createdAt: string;
   hourlyRate?: number; // For payroll calculations
@@ -267,7 +267,7 @@ export type CashReconciliation = {
   cashSales: number;
   cardSales: number;
   mobileMoneySales: number;
-  posSales: number;
+  // posSales: number; // Removed - POS feature discontinued
   totalSales: number;
   cashIn: number;
   cashOut: number;

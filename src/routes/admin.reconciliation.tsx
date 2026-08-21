@@ -24,8 +24,7 @@ const mockReconciliations: CashReconciliation[] = [
     cashSales: 1250,
     cardSales: 850,
     mobileMoneySales: 1200,
-    posSales: 450,
-    totalSales: 3750,
+    totalSales: 3300,
     cashIn: 200,
     cashOut: 150,
     expectedCash: 1800,
@@ -44,8 +43,7 @@ const mockReconciliations: CashReconciliation[] = [
     cashSales: 980,
     cardSales: 620,
     mobileMoneySales: 890,
-    posSales: 320,
-    totalSales: 2810,
+    totalSales: 2490,
     cashIn: 100,
     cashOut: 80,
     expectedCash: 1300,
@@ -80,7 +78,6 @@ function AdminReconciliation() {
     cashSales: "",
     cardSales: "",
     mobileMoneySales: "",
-    posSales: "",
     cashIn: "",
     cashOut: "",
     actualCash: "",
@@ -325,16 +322,6 @@ function AdminReconciliation() {
                   type="number"
                   value={formData.mobileMoneySales}
                   onChange={(e) => setFormData({ ...formData, mobileMoneySales: e.target.value })}
-                  className="h-10 w-full rounded-md border border-border bg-card px-4 text-sm outline-none focus:border-primary"
-                  placeholder="₵0.00"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">POS Sales</label>
-                <input
-                  type="number"
-                  value={formData.posSales}
-                  onChange={(e) => setFormData({ ...formData, posSales: e.target.value })}
                   className="h-10 w-full rounded-md border border-border bg-card px-4 text-sm outline-none focus:border-primary"
                   placeholder="₵0.00"
                 />
