@@ -1,15 +1,8 @@
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import viteTsconfigPaths from "vite-tsconfig-paths";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  tanstackStart: {
-    server: { 
-      entry: "server",
-    },
-  },
-  nitro: {
-    preset: "vercel",
-    externals: {
-      inline: ["tslib"],
-    },
-  },
+  plugins: [react(), viteTsconfigPaths(), tailwindcss()],
 });
