@@ -17,7 +17,7 @@ import {
   Star,
   DollarSign,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 interface NavItem {
   label: string;
@@ -50,13 +50,37 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen((prev) => !prev);
+  }, []);
+
+  const closeSidebar = useCallback(() => {
+    setSidebarOpen(false);
+  }, []);
+
+  const toggleSidebarCollapsed = useCallback(() => {
+    setSidebarCollapsed((prev) => !prev);
+  }, []);
+
+  const expandSidebar = useCallback(() => {
+    setSidebarCollapsed(false);
+  }, []);
+
+  const sidebarClassName = useMemo(() => {
+    return `hidden lg:block border-r border-border bg-background h-screen fixed top-0 left-0 flex-shrink-0 transition-all duration-300 z-30 ${sidebarCollapsed ? "w-16" : "w-64"}`;
+  }, [sidebarCollapsed]);
+
+  const mainContentClassName = useMemo(() => {
+    return `flex-1 overflow-auto lg:ml-0 ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"}`;
+  }, [sidebarCollapsed]);
+
   return (
     <div className="min-h-screen bg-background flex flex-col lg:flex-row">
       {/* Mobile header */}
       <div className="lg:hidden flex items-center justify-between border-b border-border bg-background px-4 py-3 sticky top-0 z-40">
         <span className="font-semibold text-gold">Vicky's Place Admin</span>
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
+          onClick={toggleSidebar}
           className="p-2 hover:bg-muted rounded-md"
           aria-label="Toggle menu"
         >
@@ -67,7 +91,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSidebarOpen(false)} />
+          <div className="absolute inset-0 bg-black/50" onClick={closeSidebar} />
           <div className="absolute left-0 top-0 h-full w-72 max-w-[85vw] bg-background border-r border-border shadow-lg overflow-y-auto">
             <div className="p-6">
               <h1 className="font-serif text-xl text-gold">Vicky's Place</h1>
@@ -75,7 +99,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
             <AdminSidebarContent
               location={location}
-              closeSidebar={() => setSidebarOpen(false)}
+              closeSidebar={closeSidebar}
               collapsed={false}
             />
           </div>
@@ -83,15 +107,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Desktop sidebar */}
-      <div
-        className={`hidden lg:block border-r border-border bg-background h-screen fixed top-0 left-0 flex-shrink-0 transition-all duration-300 z-30 ${sidebarCollapsed ? "w-16" : "w-64"}`}
-      >
+      <div className={sidebarClassName}>
         <div className="p-6 flex items-center justify-between flex-shrink-0">
           <h1 className={`font-serif text-gold ${sidebarCollapsed ? "text-lg" : "text-xl"}`}>
             {sidebarCollapsed ? "VP" : "Vicky's Place"}
           </h1>
           <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onClick={toggleSidebarCollapsed}
             className="p-2 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground"
             aria-label="Toggle sidebar"
           >
@@ -109,13 +131,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <AdminSidebarContent
             location={location}
             collapsed={sidebarCollapsed}
-            onExpand={() => setSidebarCollapsed(false)}
+            onExpand={expandSidebar}
           />
         </div>
       </div>
 
       {/* Main content */}
-      <div className={`flex-1 overflow-auto lg:ml-0 ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>{children}</div>
+      <div className={mainContentClassName}>{children}</div>
     </div>
   );
 }
@@ -133,6 +155,15 @@ function AdminSidebarContent({
 }) {
   const router = useRouter();
 
+  const handleNavigate = useCallback((to: string) => {
+    router.navigate({ to: to as any });
+    closeSidebar?.();
+  }, [router, closeSidebar]);
+
+  const handleExitAdmin = useCallback(() => {
+    router.navigate({ to: "/" });
+  }, [router]);
+
   return (
     <nav className="px-4 py-2 flex flex-col h-full">
       <ul className="space-y-1 flex-1 overflow-y-auto py-2">
@@ -146,29 +177,7 @@ function AdminSidebarContent({
           return (
             <li key={item.to}>
               <button
-                onClick={() => {
-                  router.navigate({
-                    to: item.to as
-                      | "/"
-                      | "/admin/pos"
-                      | "/admin/products"
-                      | "/admin/categories"
-                      | "/admin/orders"
-                      | "/admin/customers"
-                      | "/admin/finance"
-                      | "/admin/suppliers"
-                      | "/admin/purchase-orders"
-                      | "/admin/reports"
-                      | "/admin/loyalty"
-                      | "/admin/reconciliation"
-                      | "/admin/ops/tasks"
-                      | "/admin/ops/calendar"
-                      | "/admin/ops/staff"
-                      | "/admin/ops/activity"
-                      | "/admin/ops/content",
-                  });
-                  closeSidebar?.();
-                }}
+                onClick={() => handleNavigate(item.to)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-left ${
                   isActive
                     ? "bg-primary text-primary-foreground"
@@ -197,7 +206,7 @@ function AdminSidebarContent({
       )}
       <div className="mt-6 pt-6 border-t border-border">
         <button
-          onClick={() => router.navigate({ to: "/" })}
+          onClick={handleExitAdmin}
           className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors text-left ${collapsed ? "justify-center" : ""}`}
           title={collapsed ? "Exit Admin" : undefined}
         >
