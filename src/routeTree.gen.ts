@@ -24,7 +24,6 @@ import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
-import { Route as AdminPosRouteImport } from './routes/admin.pos'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminPurchaseOrdersRouteImport } from './routes/admin.purchase-orders'
 import { Route as AdminReconciliationRouteImport } from './routes/admin.reconciliation'
@@ -117,11 +116,6 @@ const AdminLoyaltyRoute = AdminLoyaltyRouteImport.update({
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminPosRoute = AdminPosRouteImport.update({
-  id: '/pos',
-  path: '/pos',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
@@ -230,7 +224,6 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
-  '/admin/pos': typeof AdminPosRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/purchase-orders': typeof AdminPurchaseOrdersRoute
   '/admin/reconciliation': typeof AdminReconciliationRoute
@@ -265,7 +258,6 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
-  '/admin/pos': typeof AdminPosRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/purchase-orders': typeof AdminPurchaseOrdersRoute
   '/admin/reconciliation': typeof AdminReconciliationRoute
@@ -302,7 +294,6 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
   '/admin/orders': typeof AdminOrdersRouteWithChildren
-  '/admin/pos': typeof AdminPosRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/purchase-orders': typeof AdminPurchaseOrdersRoute
   '/admin/reconciliation': typeof AdminReconciliationRoute
@@ -340,7 +331,6 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/loyalty'
     | '/admin/orders'
-    | '/admin/pos'
     | '/admin/products'
     | '/admin/purchase-orders'
     | '/admin/reconciliation'
@@ -375,7 +365,6 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/loyalty'
     | '/admin/orders'
-    | '/admin/pos'
     | '/admin/products'
     | '/admin/purchase-orders'
     | '/admin/reconciliation'
@@ -411,7 +400,6 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/loyalty'
     | '/admin/orders'
-    | '/admin/pos'
     | '/admin/products'
     | '/admin/purchase-orders'
     | '/admin/reconciliation'
@@ -551,13 +539,6 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/admin/orders'
       preLoaderRoute: typeof AdminOrdersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/pos': {
-      id: '/admin/pos'
-      path: '/pos'
-      fullPath: '/admin/pos'
-      preLoaderRoute: typeof AdminPosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/products': {
@@ -738,7 +719,6 @@ interface AdminRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   AdminLoyaltyRoute: typeof AdminLoyaltyRoute
   AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
-  AdminPosRoute: typeof AdminPosRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminPurchaseOrdersRoute: typeof AdminPurchaseOrdersRoute
   AdminReconciliationRoute: typeof AdminReconciliationRoute
@@ -759,7 +739,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   AdminLoyaltyRoute: AdminLoyaltyRoute,
   AdminOrdersRoute: AdminOrdersRouteWithChildren,
-  AdminPosRoute: AdminPosRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminPurchaseOrdersRoute: AdminPurchaseOrdersRoute,
   AdminReconciliationRoute: AdminReconciliationRoute,
@@ -790,13 +769,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

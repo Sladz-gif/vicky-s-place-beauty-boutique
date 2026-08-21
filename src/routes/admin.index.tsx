@@ -19,21 +19,21 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminDashboard() {
   return (
-    <div className="p-4 lg:p-8">
+    <div className="p-4 lg:p-8 overflow-x-hidden">
       <div className="flex items-center justify-between mb-6 lg:mb-8">
-        <div>
-          <h1 className="text-xl lg:text-2xl md:text-3xl">Dashboard</h1>
+        <div className="min-w-0">
+          <h1 className="text-xl lg:text-2xl md:text-3xl truncate">Dashboard</h1>
         </div>
         <Link
           to="/"
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground shrink-0"
         >
           Back to store
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 overflow-x-hidden">
         <DashboardCard
           title="Total Revenue"
           value="₵45,230"
@@ -52,7 +52,7 @@ function AdminDashboard() {
         <DashboardCard title="Customers" value="89" change="+15" icon={Users} positive />
       </div>
 
-      <div className="mt-8 lg:mt-12 grid gap-6 lg:gap-8 lg:grid-cols-2">
+      <div className="mt-8 lg:mt-12 grid gap-6 lg:gap-8 lg:grid-cols-2 overflow-x-hidden">
         <SectionCard title="Recent Orders" link="/admin/orders" linkText="View all orders">
           <div className="space-y-4">
             {[
