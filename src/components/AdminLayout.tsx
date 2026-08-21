@@ -27,7 +27,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
-  { label: "POS", to: "/admin/pos", icon: ShoppingCart },
   { label: "Products", to: "/admin/products", icon: Package },
   { label: "Categories", to: "/admin/categories", icon: Package },
   { label: "Orders", to: "/admin/orders", icon: ShoppingCart },
