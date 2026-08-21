@@ -11,6 +11,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", to: "/admin", module: "" },
+  { label: "POS", to: "/admin/pos", module: "inventory" },
   { label: "Products", to: "/admin/products", module: "inventory" },
   { label: "Categories", to: "/admin/categories", module: "inventory" },
   { label: "Orders", to: "/admin/orders", module: "orders" },

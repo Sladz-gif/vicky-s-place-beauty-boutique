@@ -3,6 +3,7 @@ import { Package, ShoppingCart, Users, TrendingUp, ArrowRight } from "lucide-rea
 import { mockActivityLog } from "@/data/mock/activityLog";
 import { formatDateTime } from "@/data/api";
 import type { ActivityLogEntry } from "@/data/types";
+import { useMemo } from "react";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -18,6 +19,8 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminDashboard() {
+  const recentActivity = useMemo(() => mockActivityLog.slice(0, 5), []);
+
   return (
     <div className="p-4 lg:p-8 overflow-x-hidden">
       <div className="flex items-center justify-between mb-6 lg:mb-8">
@@ -109,7 +112,7 @@ function AdminDashboard() {
           linkText="View all activity"
         >
           <div className="space-y-4">
-            {mockActivityLog.slice(0, 5).map((entry: ActivityLogEntry) => (
+            {recentActivity.map((entry: ActivityLogEntry) => (
               <div
                 key={entry.id}
                 className="flex items-start gap-3 rounded-lg border border-border bg-card p-4"
