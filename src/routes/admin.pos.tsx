@@ -12,6 +12,8 @@ import {
   Maximize2,
   X,
 } from "lucide-react";
+
+// POS Route - Point of Sale functionality
 import { mockProducts } from "@/data/mock/products";
 import { formatPrice } from "@/data/api";
 import type { Product, Variant } from "@/data/types";
