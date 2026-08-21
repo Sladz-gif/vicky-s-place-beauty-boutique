@@ -18,8 +18,6 @@ import { mockProducts } from "@/data/mock/products";
 import { formatPrice } from "@/data/api";
 import type { Product, Variant } from "@/data/types";
 import { useState } from "react";
-import { usePaystackQRPayment } from "@/hooks/usePaystackQRPayment";
-import { PaymentQRCode } from "@/components/PaymentQRCode";
 
 interface CartItem {
   variant: Variant;
@@ -50,8 +48,6 @@ function AdminPOS() {
   >("cash");
   const [amountReceived, setAmountReceived] = useState("");
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
-
-  const qrPayment = usePaystackQRPayment();
 
   const filteredProducts = mockProducts.filter(
     (product: Product) =>
@@ -108,46 +104,20 @@ function AdminPOS() {
       return;
     }
 
-    if (paymentMethod === "card") {
-      // Start QR payment flow
-      const customerEmail = customerPhone
-        ? `${customerPhone}@vickysplace.com`
-        : "customer@vickysplace.com";
-      qrPayment.startPayment(total, customerEmail, customerName || "Guest");
-    } else {
-      // Cash and mobile money payments
-      console.log("Processing sale:", {
-        items: cart,
-        customer: { name: customerName, phone: customerPhone },
-        paymentMethod,
-        total,
-        amountReceived: paymentMethod === "cash" ? parseFloat(amountReceived) : total,
-        change: paymentMethod === "cash" ? change : 0,
-      });
-      alert("Sale completed successfully!");
-      setCart([]);
-      setCustomerName("");
-      setCustomerPhone("");
-      setAmountReceived("");
-      setPaymentMethod("cash");
-    }
-  };
-
-  const handlePaymentSuccess = () => {
     console.log("Processing sale:", {
       items: cart,
       customer: { name: customerName, phone: customerPhone },
       paymentMethod,
       total,
-      paymentReference: qrPayment.reference,
+      amountReceived: paymentMethod === "cash" ? parseFloat(amountReceived) : total,
+      change: paymentMethod === "cash" ? change : 0,
     });
-    alert("Payment successful! Sale completed.");
+    alert("Sale completed successfully!");
     setCart([]);
     setCustomerName("");
     setCustomerPhone("");
     setAmountReceived("");
     setPaymentMethod("cash");
-    qrPayment.cancel();
   };
 
   const handlePrintReceipt = () => {
@@ -156,7 +126,6 @@ function AdminPOS() {
       customer: { name: customerName, phone: customerPhone },
       paymentMethod,
       total,
-      paymentReference: qrPayment.reference,
     });
     alert("Receipt printed!");
   };
@@ -366,9 +335,6 @@ function AdminPOS() {
                           method.value as
                             "cash" | "card" | "mtn_momo" | "vodafone_cash" | "airteltigo_money",
                         );
-                        if (method.value === "card") {
-                          qrPayment.cancel();
-                        }
                       }}
                       className={`flex flex-col items-center gap-2 p-3 rounded-md border text-sm ${
                         paymentMethod === method.value
@@ -404,51 +370,13 @@ function AdminPOS() {
                 </div>
               )}
 
-              {paymentMethod === "card" && qrPayment.status !== "idle" && (
-                <PaymentQRCode
-                  status={qrPayment.status}
-                  qrUrl={qrPayment.qrUrl}
-                  reference={qrPayment.reference}
-                  onCancel={qrPayment.cancel}
-                  onConfirmPayment={qrPayment.markSuccess}
-                  onRetry={() => {
-                    qrPayment.cancel();
-                    const customerEmail = customerPhone
-                      ? `${customerPhone}@vickysplace.com`
-                      : "customer@vickysplace.com";
-                    qrPayment.startPayment(total, customerEmail, customerName || "Guest");
-                  }}
-                />
-              )}
-
-              {paymentMethod === "card" && qrPayment.status === "success" && (
-                <button
-                  onClick={handlePaymentSuccess}
-                  className="w-full flex items-center justify-center gap-2 rounded-md bg-green-600 px-6 py-4 text-base font-semibold text-white transition-colors hover:bg-green-700"
-                >
-                  Complete Sale
-                </button>
-              )}
-
-              {paymentMethod !== "card" && (
-                <button
-                  onClick={handleCheckout}
-                  disabled={cart.length === 0}
-                  className="w-full flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-deep disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Complete Sale
-                </button>
-              )}
-
-              {paymentMethod === "card" && qrPayment.status === "idle" && (
-                <button
-                  onClick={handleCheckout}
-                  disabled={cart.length === 0}
-                  className="w-full flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-deep disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Start Card Payment
-                </button>
-              )}
+              <button
+                onClick={handleCheckout}
+                disabled={cart.length === 0}
+                className="w-full flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-deep disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Complete Sale
+              </button>
             </div>
 
             <div className="p-6 pt-0">

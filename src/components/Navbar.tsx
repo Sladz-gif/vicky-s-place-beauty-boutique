@@ -108,6 +108,14 @@ export function Navbar() {
       {open ? (
         <nav className="flex flex-col gap-3 border-t border-border px-5 py-5 md:hidden">
           {nav(() => setOpen(false))}
+          <Link
+            to="/admin"
+            className={navLinkClass}
+            onClick={() => setOpen(false)}
+            activeProps={{ className: "text-espresso" }}
+          >
+            Admin
+          </Link>
         </nav>
       ) : null}
       <SearchModal open={searchOpen} onOpenChange={setSearchOpen} />
