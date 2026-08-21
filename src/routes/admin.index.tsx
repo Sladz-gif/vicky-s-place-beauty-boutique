@@ -22,21 +22,21 @@ function AdminDashboard() {
   const recentActivity = useMemo(() => mockActivityLog.slice(0, 5), []);
 
   return (
-    <div className="p-4 lg:p-8 overflow-x-hidden">
-      <div className="flex items-center justify-between mb-6 lg:mb-8">
-        <div className="min-w-0">
+    <div className="p-4 lg:p-8 w-full max-w-full overflow-x-hidden">
+      <div className="flex items-center justify-between mb-6 lg:mb-8 w-full">
+        <div className="min-w-0 flex-1">
           <h1 className="text-xl lg:text-2xl md:text-3xl truncate">Dashboard</h1>
         </div>
         <Link
           to="/"
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground shrink-0"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground shrink-0 ml-2"
         >
           Back to store
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 overflow-x-hidden">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full">
         <DashboardCard
           title="Total Revenue"
           value="₵45,230"
@@ -55,7 +55,7 @@ function AdminDashboard() {
         <DashboardCard title="Customers" value="89" change="+15" icon={Users} positive />
       </div>
 
-      <div className="mt-8 lg:mt-12 grid gap-6 lg:gap-8 lg:grid-cols-2 overflow-x-hidden">
+      <div className="mt-8 lg:mt-12 grid gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 w-full">
         <SectionCard title="Recent Orders" link="/admin/orders" linkText="View all orders">
           <div className="space-y-4">
             {[
@@ -66,13 +66,13 @@ function AdminDashboard() {
             ].map((order) => (
               <div
                 key={order.id}
-                className="flex items-center justify-between rounded-lg border border-border bg-card p-4"
+                className="flex items-center justify-between rounded-lg border border-border bg-card p-4 w-full"
               >
-                <div>
-                  <p className="font-semibold">{order.id}</p>
-                  <p className="text-sm text-muted-foreground">{order.customer}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold truncate">{order.id}</p>
+                  <p className="text-sm text-muted-foreground truncate">{order.customer}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0 ml-2">
                   <p className="font-semibold">{order.total}</p>
                   <p className="text-sm text-muted-foreground">{order.status}</p>
                 </div>
@@ -90,15 +90,15 @@ function AdminDashboard() {
             ].map((product) => (
               <div
                 key={product.name}
-                className="flex items-center justify-between rounded-lg border border-border bg-card p-4"
+                className="flex items-center justify-between rounded-lg border border-border bg-card p-4 w-full"
               >
-                <div>
-                  <p className="font-semibold">{product.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold truncate">{product.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">
                     {product.stock} left (threshold: {product.threshold})
                   </p>
                 </div>
-                <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-600">
+                <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-600 shrink-0 ml-2">
                   Low Stock
                 </span>
               </div>
@@ -115,10 +115,10 @@ function AdminDashboard() {
             {recentActivity.map((entry: ActivityLogEntry) => (
               <div
                 key={entry.id}
-                className="flex items-start gap-3 rounded-lg border border-border bg-card p-4"
+                className="flex items-start gap-3 rounded-lg border border-border bg-card p-4 w-full"
               >
-                <div className="flex-1">
-                  <p className="text-sm">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm break-words">
                     <span className="font-semibold">{entry.staffName}</span>
                     <span className="text-muted-foreground"> {entry.action} </span>
                     <span className="font-semibold">{entry.entityName}</span>
