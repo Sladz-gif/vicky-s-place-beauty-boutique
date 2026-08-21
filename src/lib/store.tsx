@@ -293,7 +293,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const value: SessionContext = {
+  const value: SessionContext = useMemo(() => ({
     state,
     addToCart,
     removeFromCart,
@@ -314,7 +314,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     logoutStaff,
     addOrder,
     updateOrderStatus,
-  };
+  }), [state, addToCart, removeFromCart, updateCartQty, clearCart, setCartOpen, applyDiscountCode, removeDiscountCode, setCustomer, addToWishlist, removeFromWishlist, toggleWishlist, addCustomerAddress, updateCustomerAddress, removeCustomerAddress, setDefaultAddress, setStaff, logoutStaff, addOrder, updateOrderStatus]);
 
   return <SessionCtx.Provider value={value}>{children}</SessionCtx.Provider>;
 }

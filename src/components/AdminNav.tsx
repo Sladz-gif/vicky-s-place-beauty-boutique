@@ -1,7 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAdminAuth } from "@/lib/admin";
 import { LogOut, Menu } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 interface NavItem {
   label: string;
@@ -29,12 +29,26 @@ export function AdminNav() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const filteredNavItems = navItems.filter((item) => {
-    // Dashboard is always visible
-    if (item.module === "") return true;
-    // Filter by module access
-    return hasModuleAccess(item.module);
-  });
+  const filteredNavItems = useMemo(() => {
+    return navItems.filter((item) => {
+      // Dashboard is always visible
+      if (item.module === "") return true;
+      // Filter by module access
+      return hasModuleAccess(item.module);
+    });
+  }, [hasModuleAccess]);
+
+  const handleLogout = useCallback(() => {
+    logout();
+  }, [logout]);
+
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen((prev) => !prev);
+  }, []);
+
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
 
   return (
     <nav className="flex items-center gap-6 border-b border-border bg-background px-5 py-4 sm:px-8">
@@ -60,14 +74,14 @@ export function AdminNav() {
         )}
         <button
           type="button"
-          onClick={logout}
+          onClick={handleLogout}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <LogOut className="h-4 w-4" />
           <span className="hidden sm:inline">Logout</span>
         </button>
         <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={toggleMobileMenu}
           className="sm:hidden p-2 hover:bg-muted rounded-md"
         >
           <Menu className="h-5 w-5" />
@@ -76,7 +90,7 @@ export function AdminNav() {
           <div className="fixed inset-0 z-50 sm:hidden">
             <div
               className="absolute inset-0 bg-black/50"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={closeMobileMenu}
             />
             <div className="absolute right-0 top-0 h-full w-64 bg-background p-6 shadow-lg">
               <div className="flex flex-col gap-4">
@@ -85,7 +99,7 @@ export function AdminNav() {
                   <Link
                     key={item.to}
                     to={item.to}
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={closeMobileMenu}
                     className={`label-caps text-sm transition-colors hover:text-primary-deep ${
                       location.pathname === item.to ? "text-espresso" : "text-muted-foreground"
                     }`}
