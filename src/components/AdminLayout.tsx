@@ -84,7 +84,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
       {/* Desktop sidebar */}
       <div
-        className={`hidden lg:block border-r border-border bg-background h-screen sticky top-0 flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? "w-16" : "w-64"}`}
+        className={`hidden lg:block border-r border-border bg-background h-screen fixed top-0 left-0 flex-shrink-0 transition-all duration-300 z-30 ${sidebarCollapsed ? "w-16" : "w-64"}`}
       >
         <div className="p-6 flex items-center justify-between flex-shrink-0">
           <h1 className={`font-serif text-gold ${sidebarCollapsed ? "text-lg" : "text-xl"}`}>
@@ -115,7 +115,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-auto">{children}</div>
+      <div className={`flex-1 overflow-auto lg:ml-0 ${sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"}`}>{children}</div>
     </div>
   );
 }
