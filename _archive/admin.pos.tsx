@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+﻿import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Search,
   Plus,
@@ -24,7 +24,7 @@ interface CartItem {
 export const Route = createFileRoute("/admin/pos")({
   head: () => ({
     meta: [
-      { title: "POS — Admin Dashboard" },
+      { title: "POS ΓÇö Admin Dashboard" },
       {
         name: "description",
         content: "Point of Sale for Vicky's Place.",

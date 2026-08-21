@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   Search,
   ShoppingCart,
@@ -244,7 +244,7 @@ function AdminPos() {
     if (!saleData) return;
 
     const formatPriceForPrint = (amount: number) =>
-      `₵${amount.toLocaleString("en-GH", {
+      `Γé╡${amount.toLocaleString("en-GH", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       })}`;
